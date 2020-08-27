@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -19,11 +20,14 @@ public class PlayerMovement : MonoBehaviour
     public float crouchSpeedMod = 0.5f; // crouching speed modifier
     public float airSpeedMod = 0.25f; // airstrafing speed modifier
     public float defaultJump = 3f; // default jump strength
-    public float sprintStamina = 8f; // stamina lost by sprinting
-    public float crouchStamina = 20f; // stamina lost by crouching
-    public float jumpStamina = 30f; // stamina lost by jumping
+    public float sprintStamina = 7f; // stamina lost by sprinting
+    public float crouchStamina = 9f; // stamina lost by crouching
+    public float jumpStamina = 20f; // stamina lost by jumping
     public float groundCheckRadius = 0.2f; // radius of ground check sphere
     public LayerMask groundMask;
+
+    public Text staminaText; // text to display current stamina level
+    public Text speedText; // text to display current speed
 
     private Vector3 _fallVel; // vector3 to track falling velocity
     private float _speed; // final speed modifier
@@ -38,7 +42,11 @@ public class PlayerMovement : MonoBehaviour
     {
         _source = GetComponent<AudioSource>(); // gets audio source
         _source.playOnAwake = false; // does not play on startup
-        _source.spatialBlend = 1f; // makes the sound 3D]
+        _source.spatialBlend = 1f; // makes the sound 3D
+
+        // set default stat text values
+        staminaText.text = "Stm: " + stamina.ToString("#.#") + "%";
+        speedText.text = "Spd: " + _speed.ToString("#.#") + "m/s";
     }
 
     // Update is called once per frame
@@ -61,6 +69,10 @@ public class PlayerMovement : MonoBehaviour
         ApplyGravity(); // move player down
         
         StaminaCheck(); // regain or reset player's stamina
+
+        // update stat texts
+        staminaText.text = "Stm: " + stamina.ToString("#.#") + "%";
+        speedText.text = "Spd: " +  _speed.ToString("#.#") + "m/s";
     }
 
     // function to keep player on the ground
@@ -108,16 +120,18 @@ public class PlayerMovement : MonoBehaviour
     // function to check if player is crouching
     void CrouchCheck()
     {
-        if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && !_isCrouching)
+        if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && !_isCrouching && (stamina >= crouchStamina))
         {
             _isCrouching = true; // start crouching
             _isSprinting = false; // stop sprinting
+            stamina -= crouchStamina * staminaUsageMod; // reduce stamina
         }
         else if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && _isCrouching)
         {
             _isCrouching = false; // stop crouching
+            stamina -= crouchStamina * staminaUsageMod; // reduce stamina
         }
-        else if (!SettingsMenu.toggleCrouch && Input.GetButton("Crouch"))
+        else if (!SettingsMenu.toggleCrouch && Input.GetButton("Crouch") && (stamina >= crouchStamina))
         {
             _isCrouching = true; // crouch
             _isSprinting = false; // don't sprint
@@ -168,19 +182,21 @@ public class PlayerMovement : MonoBehaviour
         // get correct speed modifier
         if (_isSprinting) // sprinting
         {
-             _speed = defaultSpeed * speedMod * sprintSpeedMod;
+            _speed = defaultSpeed * speedMod * sprintSpeedMod;
+            stamina -= sprintStamina * staminaUsageMod * Time.deltaTime; // use stamina
         }
         else if (_isCrouching) // crouching
         {
-             _speed = defaultSpeed * speedMod * crouchSpeedMod;
+            _speed = defaultSpeed * speedMod * crouchSpeedMod;
+            stamina -= crouchStamina * staminaUsageMod * Time.deltaTime; // use stamina
         }
         else if (!_isGrounded) // falling
         {
-             _speed = defaultSpeed * speedMod * airSpeedMod;
+            _speed = defaultSpeed * speedMod * airSpeedMod;
         }
         else // walking
         {
-             _speed = defaultSpeed * speedMod * walkSpeedMod;
+            _speed = defaultSpeed * speedMod * walkSpeedMod;
         }
        
         controller.Move(playerMove * _speed * Time.deltaTime); // apply movement to character
@@ -212,9 +228,11 @@ public class PlayerMovement : MonoBehaviour
         {
             stamina = 100; // reset stamina
         }
-        else if (stamina < 0)
+        else if (stamina <= 0)
         {
             stamina = 0; // reset stamina
+            _isSprinting = false; // stop sprinting
+            _isCrouching = false; // stop crouching
         }
     }
 }

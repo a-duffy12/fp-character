@@ -86,14 +86,14 @@ public class SettingsMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Menu") && !_openSettings)
+        if (Input.GetButtonDown("Pause") && !_openSettings)
         {
             Time.timeScale = 0; // freeze scene
             settingsMenuUI.SetActive(true); // open settings
             _openSettings = true; // set to open
             Cursor.lockState = CursorLockMode.Confined; // unlock cursor
         }
-        else if (Input.GetButtonDown("Menu") && _openSettings)
+        else if (!Input.GetButtonDown("Pause") && _openSettings)
         {
             settingsMenuUI.SetActive(false); // close settings
             _openSettings = false; // set to closed
