@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class MouseLook : MonoBehaviour
 {
-    public static float mouseSensX = 100f; // universal horizontal sensitivity multiplier
-    public static float mouseSensY = 100f; // universal vertical sensitivity multiplier
     public Transform playerBody; // gameobject for player body
     public Transform playerHead; // gameobject for player head
+    public float sensMod = 2f; // modifier for sensitivity
 
     float xRotation = 0f;
 
@@ -20,8 +19,8 @@ public class MouseLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensX * Time.deltaTime; // get mouse movement along x axis
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensY * Time.deltaTime; // get mouse movement along y axis
+        float mouseX = Input.GetAxis("Mouse X") * SettingsMenu.mouseSensX * sensMod * Time.deltaTime; // get mouse movement along x axis
+        float mouseY = Input.GetAxis("Mouse Y") * SettingsMenu.mouseSensY * sensMod * Time.deltaTime; // get mouse movement along y axis
 
         xRotation -= mouseY; // set new mouse rotation
         // for clamp, first value is up, second is down
