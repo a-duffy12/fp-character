@@ -17,11 +17,11 @@ public class PlayerMovement : MonoBehaviour
     public float walkSpeedMod = 1f; // walking speed modifier
     public float sprintSpeedMod = 2f; // sprinting speed modifier
     public float crouchSpeedMod = 0.5f; // crouching speed modifier
-    public float airSpeedMod = 0.2f; // airstrafing speed modifier
+    public float airSpeedMod = 0.25f; // airstrafing speed modifier
     public float defaultJump = 3f; // default jump strength
-    public float sprintStamina = 10f; // stamina lost by sprinting
-    public float crouchStamina = 25f; // stamina lost by crouching
-    public float jumpStamina = 50f; // stamina lost by jumping
+    public float sprintStamina = 8f; // stamina lost by sprinting
+    public float crouchStamina = 20f; // stamina lost by crouching
+    public float jumpStamina = 30f; // stamina lost by jumping
     public float groundCheckRadius = 0.2f; // radius of ground check sphere
     public LayerMask groundMask;
 
@@ -30,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
     private bool _isGrounded; // whether the player is on the ground or not
     private bool _isSprinting; // whether the player is sprinting or not
     private bool _isCrouching; // whether the player is crouched or not
+    private int _leanState; // whether the player is straight (0), leaning left (1), or leaning right (2)
     private AudioSource _source; // source for player audio
 
     // Start is called before the first frame update
@@ -43,11 +44,19 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GroundCheck(); // ensure player is on the ground     
+        GroundCheck(); // ensure player is on the ground  
+
+        SprintCheck(); // check if player is sprinting
+
+        CrouchCheck(); // check if player is crouching
+
+        LeanCheck(); // check if player is leaning   
 
         Move(); // move player forward/backward/left/right
 
         Jump(); // move player up
+
+        Lean(); // lean player body left or right
 
         ApplyGravity(); // move player down
         
@@ -73,6 +82,81 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(_fallVel * Time.deltaTime); // apply gravity
     }
 
+    // function to check if player is sprinting
+    void SprintCheck()
+    {
+        if (SettingsMenu.toggleSprint && Input.GetButtonDown("Sprint") && !_isSprinting)
+        {
+            _isSprinting = true; // start sprinting
+            _isCrouching = false; // stop crouching
+        }
+        else if (SettingsMenu.toggleSprint && Input.GetButtonDown("Sprint") && _isSprinting)
+        {
+            _isSprinting = false; // stop sprinting
+        }
+        else if (!SettingsMenu.toggleSprint && Input.GetButton("Sprint"))
+        {
+            _isSprinting = true; // sprint
+            _isCrouching = false; // don't crouch
+        }
+        else if (!SettingsMenu.toggleSprint && !Input.GetButton("Sprint"))
+        {
+            _isSprinting = false; // don't sprint
+        }
+    }
+
+    // function to check if player is crouching
+    void CrouchCheck()
+    {
+        if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && !_isCrouching)
+        {
+            _isCrouching = true; // start crouching
+            _isSprinting = false; // stop sprinting
+        }
+        else if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && _isCrouching)
+        {
+            _isCrouching = false; // stop crouching
+        }
+        else if (!SettingsMenu.toggleCrouch && Input.GetButton("Crouch"))
+        {
+            _isCrouching = true; // crouch
+            _isSprinting = false; // don't sprint
+        }
+        else if (!SettingsMenu.toggleCrouch && !Input.GetButton("Crouch"))
+        {
+            _isCrouching = false; // don't crouch
+        }
+    }
+
+    // function to check if player is leaning
+    void LeanCheck()
+    {
+        if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Left") && (_leanState == 0 || _leanState == 2))
+        {
+            _leanState = 1; // lean left
+        }
+        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Left") && _leanState == 1)
+        {
+            _leanState = 0; // unlean left
+        }
+        else if (!SettingsMenu.toggleLean && Input.GetButton("Lean Left"))
+        {
+            _leanState = 1; // lean left
+        }
+        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Right") && (_leanState == 0 || _leanState == 1))
+        {
+            _leanState = 2; // lean right
+        }
+        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Right") && _leanState == 2)
+        {
+            _leanState = 0; // unlean right
+        }
+        else if (!SettingsMenu.toggleLean && Input.GetButton("Lean Right"))
+        {
+            _leanState = 2; // lean right
+        }
+    }
+
     // function to apply movement to the player
     void Move()
     {
@@ -82,9 +166,23 @@ public class PlayerMovement : MonoBehaviour
         Vector3 playerMove = transform.right * xMove + transform.forward * zMove; // add WASD movement to player
 
         // get correct speed modifier
-        // TODO if statement for walking, sprinting, crouching
-        _speed = defaultSpeed * speedMod;
-
+        if (_isSprinting) // sprinting
+        {
+             _speed = defaultSpeed * speedMod * sprintSpeedMod;
+        }
+        else if (_isCrouching) // crouching
+        {
+             _speed = defaultSpeed * speedMod * crouchSpeedMod;
+        }
+        else if (!_isGrounded) // falling
+        {
+             _speed = defaultSpeed * speedMod * airSpeedMod;
+        }
+        else // walking
+        {
+             _speed = defaultSpeed * speedMod * walkSpeedMod;
+        }
+       
         controller.Move(playerMove * _speed * Time.deltaTime); // apply movement to character
     }
 
@@ -96,6 +194,12 @@ public class PlayerMovement : MonoBehaviour
             _fallVel.y = Mathf.Sqrt(defaultJump * -2f * lilG); // adds velocity to jump
             stamina -= jumpStamina * staminaUsageMod;
         }
+    }
+
+    // function to make player lean left or right
+    void Lean()
+    {
+        // TODO
     }
 
     // function to regain and reset stamina
