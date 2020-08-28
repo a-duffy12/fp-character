@@ -93,7 +93,7 @@ public class SettingsMenu : MonoBehaviour
             _openSettings = true; // set to open
             Cursor.lockState = CursorLockMode.Confined; // unlock cursor
         }
-        else if (!Input.GetButtonDown("Pause") && _openSettings)
+        else if (Input.GetButtonDown("Pause") && _openSettings)
         {
             settingsMenuUI.SetActive(false); // close settings
             _openSettings = false; // set to closed
