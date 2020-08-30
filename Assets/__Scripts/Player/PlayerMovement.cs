@@ -95,6 +95,7 @@ public class PlayerMovement : MonoBehaviour
         else if (_isGrounded && _fallVel.y < -1) // TODO
         {
             _source.clip = dropAudio; // sets drop audio
+            _source.volume = 1f; // sets drop volume
             _source.Play(); // plays drop audio
         }
     }
@@ -139,6 +140,7 @@ public class PlayerMovement : MonoBehaviour
             _isSprinting = false; // stop sprinting
             stamina -= crouchStamina * staminaUsageMod; // reduce stamina
             _source.clip = crouchAudio; // sets crouch audio
+            _source.volume = 1f; // sets crouch volume
             _source.Play(); // plays crouch audio
         }
         else if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && _isCrouching && (stamina >= (crouchStamina * staminaUsageMod)))
@@ -146,6 +148,7 @@ public class PlayerMovement : MonoBehaviour
             _isCrouching = false; // stop crouching
             stamina -= crouchStamina * staminaUsageMod; // reduce stamina
             _source.clip = crouchAudio; // sets crouch audio
+            _source.volume = 1f; // sets crouch volume
             _source.Play(); // plays crouch audio
         }
         else if (!SettingsMenu.toggleCrouch && Input.GetButton("Crouch") && (stamina >= (crouchStamina * staminaUsageMod)))
@@ -205,17 +208,18 @@ public class PlayerMovement : MonoBehaviour
             if ((xMove != 0 || zMove != 0) && _isGrounded && !_source.isPlaying)
             {
                 _source.clip = sprintAudio; // sets sprint audio
+                _source.volume = 1f; // sets sprint volume
                 _source.Play(); // plays sprint audio
             } 
         }
         else if (_isCrouching) // crouching
         {
             _speed = defaultSpeed * speedMod * crouchSpeedMod;
-            stamina -= crouchStamina * staminaUsageMod * Time.deltaTime; // use stamina
         
             if ((xMove != 0 || zMove != 0) && _isGrounded && !_source.isPlaying)
             {
                 _source.clip = crouchWalkAudio; // sets crouch walk audio
+                _source.volume = 0.5f; // sets crouch walk volume
                 _source.Play(); // plays crouch walk audio
             }
         }
@@ -230,6 +234,7 @@ public class PlayerMovement : MonoBehaviour
             if ((xMove != 0 || zMove != 0) && _isGrounded && !_source.isPlaying)
             {
                 _source.clip = walkAudio; // sets walk audio
+                _source.volume = 0.7f; // sets walk volume
                 _source.Play(); // plays walk audio
             }
         }
@@ -245,6 +250,7 @@ public class PlayerMovement : MonoBehaviour
             _fallVel.y = Mathf.Sqrt(defaultJump * -2f * lilG); // adds velocity to jump
             stamina -= jumpStamina * staminaUsageMod;
             _source.clip = jumpAudio; // sets jump audio
+            _source.volume = 1f; // sets jump volume
             _source.Play(); // plays jump audio
         }
     }
@@ -265,11 +271,12 @@ public class PlayerMovement : MonoBehaviour
         {
             stamina = 100; // reset stamina
         }
-        else if (stamina <= 50)
+        else if (stamina <= 40)
         {
             if (_isGrounded && !_source.isPlaying)
             {
                 _source.clip = lowStaminaAudio; // sets low stamina audio
+                _source.volume = 1f; // sets low stamina volume
                 _source.Play(); // plays low stamina audio
             }
         }

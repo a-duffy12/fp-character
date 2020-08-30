@@ -7,18 +7,22 @@ public class SettingsMenu : MonoBehaviour
 {
     public static float mouseSensX; // universal horizontal sensitivity multiplier
     public static float mouseSensY; // universal vertical sensitivity multiplier
+    public static float verticalFOV; // first person camera field of view
     public static bool toggleSprint; // whether sprint is toggle or hold
     public static bool toggleCrouch; // whether crouch is toggle or hold
     public static bool toggleLean; // whether lean is toggle or hold
 
+    public Camera cam; // first person camera
     public GameObject settingsMenuUI; // ui panel for settings menu
     public Slider xSlider; // slider for x sens
     public Slider ySlider; // slider for y sens
+    public Slider fovSlider; // slider for vertical fov
     public Button sprintButton; // button to choose sprint mode
     public Button crouchButton; // button to choose crouch mode
     public Button leanButton; // button to choose lean mode
     public Text xText; // text for x sens 
     public Text yText; // text for y sens
+    public Text fovText; // text for vertical fov
     public Text sprintText; // text for sprint mode
     public Text crouchText; // text for crouch mode
     public Text leanText; // text for lean mode
@@ -29,24 +33,33 @@ public class SettingsMenu : MonoBehaviour
     void Start()
     {
         // default values
-        mouseSensX = 100f;
-        mouseSensY = 100f;
+        mouseSensX = 50f;
+        mouseSensY = 50f;
+        verticalFOV = 60f;
         toggleSprint = false;
         toggleCrouch = false;
         toggleLean = false;
         xSlider.minValue = 1;
         ySlider.minValue = 1;
+        fovSlider.minValue = 60;
         xSlider.maxValue = 100;
         ySlider.maxValue = 100;
-        xSlider.value = 50;
-        ySlider.value = 50;
+        fovSlider.maxValue = 90;
+        xSlider.value = mouseSensX;
+        ySlider.value = mouseSensY;
+        fovSlider.value = verticalFOV;
 
         // TODO load saved preferences
 
         // set slider and button text based on saved data or default fields
         xText.text = xSlider.value.ToString("#");
         yText.text = ySlider.value.ToString("#");
+        fovText.text = fovSlider.value.ToString("#");
 
+        // change field of view
+        cam.fieldOfView = fovSlider.value;
+
+        // set sprint, crouch, and lean texts
         if (toggleSprint)
         {
             sprintText.text = "Toggle";
@@ -103,8 +116,11 @@ public class SettingsMenu : MonoBehaviour
 
         xText.text = xSlider.value.ToString("#"); // display updated x sens
         yText.text = ySlider.value.ToString("#"); // display update y sens
+        fovText.text = fovSlider.value.ToString("#"); // display updated vertical fov
         mouseSensX = xSlider.value; // set updated x sens value
-        mouseSensY= ySlider.value; // set updated y sens value
+        mouseSensY = ySlider.value; // set updated y sens value
+        verticalFOV = fovSlider.value; // set updated field of view
+        cam.fieldOfView = fovSlider.value; // apply updated field of view
     }
 
     // function to change sprint mode
