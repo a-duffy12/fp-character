@@ -19,12 +19,12 @@ public class HealthSystem : MonoBehaviour
         _source.spatialBlend = 1f; // makes the sound 3D
 
         hp = 100f; // set default hp
-        hpText.text = "HP: " + hp; // display default heapth
+        hpText.text = "HP: " + hp.ToString("#"); // display default heapth
     }
 
     // Update is called once per frame
     void Update()
     {
-        hpText.text = "HP: " + hp; // update health ui
+        hpText.text = "HP: " + hp.ToString("#"); // update health ui
     }
 }

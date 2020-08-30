@@ -43,6 +43,8 @@ public class PlayerMovement : MonoBehaviour
     private bool _isSprinting; // whether the player is sprinting or not
     private bool _isCrouching; // whether the player is crouched or not
     private int _leanState; // whether the player is straight (0), leaning left (1), or leaning right (2)
+    private bool _inAir; // used to track player status for things like dropping audio and fall damage
+    private float[] _airVals = new float[2]; // array to keep track of start and end position in a jump
     private AudioSource _source; // source for player audio
 
     // Start is called before the first frame update
@@ -91,12 +93,25 @@ public class PlayerMovement : MonoBehaviour
         if (_isGrounded && _fallVel.y < 0) 
         {
             _fallVel.y = -1f; // use small value to make sure player is fully on the ground
+            if (_inAir)
+            {
+                _inAir = false; // set in air status to false again
+                _airVals[1] = controller.transform.position.y; // get end position
+                
+                _source.clip = dropAudio; // sets drop audio
+                _source.volume = 1f; // sets drop volume
+                _source.Play(); // plays drop audio
+
+                FallDamage(_airVals[0], _airVals[1]); // apply fall damage
+            }
         }
-        else if (_isGrounded && _fallVel.y < -1) // TODO
+        else if (!_isGrounded)
         {
-            _source.clip = dropAudio; // sets drop audio
-            _source.volume = 1f; // sets drop volume
-            _source.Play(); // plays drop audio
+            if (!_inAir)
+            {
+                _inAir = true; // set in air status to true
+                _airVals[0] = controller.transform.position.y; // get start position
+            }
         }
     }
 
@@ -285,6 +300,18 @@ public class PlayerMovement : MonoBehaviour
             stamina = 0; // reset stamina
             _isSprinting = false; // stop sprinting
             _isCrouching = false; // stop crouching
+        }
+    }
+
+    // function to apply fall damage
+    void FallDamage(float start, float end)
+    {
+        float distance = (start - end) * 10; // calculate fall distance
+        float fallDamage = (distance * distance) - 10; // calculate applicable fall damage
+        
+        if (fallDamage > 0) // apply fall damage if necessary
+        {
+            HealthSystem.hp -= fallDamage; // decrease hp
         }
     }
 }
