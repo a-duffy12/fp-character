@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
 {
-    public static float mouseSensX; // universal horizontal sensitivity multiplier
-    public static float mouseSensY; // universal vertical sensitivity multiplier
-    public static float verticalFOV; // first person camera field of view
-    public static bool toggleSprint; // whether sprint is toggle or hold
-    public static bool toggleCrouch; // whether crouch is toggle or hold
-    public static bool toggleLean; // whether lean is toggle or hold
+    public float mouseSensX; // universal horizontal sensitivity multiplier
+    public float mouseSensY; // universal vertical sensitivity multiplier
+    public float verticalFOV; // first person camera field of view
+    public bool toggleSprint; // whether sprint is toggle or hold
+    public bool toggleCrouch; // whether crouch is toggle or hold
+    public bool toggleLean; // whether lean is toggle or hold
 
     public Camera cam; // first person camera
     public GameObject settingsMenuUI; // ui panel for settings menu

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class HealthSystem : MonoBehaviour
 {
-    public static float hp; // amount of health player has
+    public float hp; // amount of health player has
 
     public Text hpText; // text to display remaining health
 
@@ -19,12 +19,18 @@ public class HealthSystem : MonoBehaviour
         _source.spatialBlend = 1f; // makes the sound 3D
 
         hp = 100f; // set default hp
-        hpText.text = "HP: " + hp.ToString("#"); // display default heapth
+        hpText.text = "HP: " + hp.ToString("#"); // display default heaplth
     }
 
     // Update is called once per frame
     void Update()
     {
         hpText.text = "HP: " + hp.ToString("#"); // update health ui
+    }
+
+    // Funtion to damage player
+    public void Damage(float dmg)
+    {
+        hp -= dmg; // reduce hp by the damage done
     }
 }

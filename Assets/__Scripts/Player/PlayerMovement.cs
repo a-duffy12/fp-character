@@ -5,12 +5,13 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public static float speedMod = 1f; // used to modify movement speed
-    public static float jumpMod = 1f; // used to modify jumping height
-    public static float staminaRegenMod = 1f; // used to modify rate at which stamina accumulates
-    public static float staminaUsageMod = 1f; // used to modify usage of stamina
     public static float lilG = -9.81f; // value of gravity (default 9.81)
-    public static float stamina = 100f; // stamina value
+
+    public float speedMod = 1f; // used to modify movement speed
+    public float jumpMod = 1f; // used to modify jumping height
+    public float staminaRegenMod = 1f; // used to modify rate at which stamina accumulates
+    public float staminaUsageMod = 1f; // used to modify usage of stamina
+    public float stamina = 100f; // stamina value
 
     public CharacterController controller; // access character controller component
     public Transform groundCheck; // check to see if player is on the ground
@@ -37,6 +38,10 @@ public class PlayerMovement : MonoBehaviour
     public AudioClip dropAudio; // sound for dropping
     public AudioClip lowStaminaAudio; // sound for low stamina
 
+    [HideInInspector]
+    public SettingsMenu settings; // access player's settings
+    public HealthSystem hpSys; // access player's health system
+
     private Vector3 _fallVel; // vector3 to track falling velocity
     private float _speed; // final speed modifier
     private bool _isGrounded; // whether the player is on the ground or not
@@ -53,6 +58,9 @@ public class PlayerMovement : MonoBehaviour
         _source = GetComponent<AudioSource>(); // gets audio source
         _source.playOnAwake = false; // does not play on startup
         _source.spatialBlend = 1f; // makes the sound 3D
+
+        settings = gameObject.GetComponent<SettingsMenu>(); // get settings access
+        hpSys = gameObject.GetComponentInChildren<HealthSystem>(); // get hp alteration access
 
         // set default stat text values
         staminaText.text = "Stm: " + stamina.ToString("#.#") + "%";
@@ -126,21 +134,21 @@ public class PlayerMovement : MonoBehaviour
     // function to check if player is sprinting
     void SprintCheck()
     {
-        if (SettingsMenu.toggleSprint && Input.GetButtonDown("Sprint") && !_isSprinting)
+        if (settings.toggleSprint && Input.GetButtonDown("Sprint") && !_isSprinting)
         {
             _isSprinting = true; // start sprinting
             _isCrouching = false; // stop crouching
         }
-        else if (SettingsMenu.toggleSprint && Input.GetButtonDown("Sprint") && _isSprinting)
+        else if (settings.toggleSprint && Input.GetButtonDown("Sprint") && _isSprinting)
         {
             _isSprinting = false; // stop sprinting
         }
-        else if (!SettingsMenu.toggleSprint && Input.GetButton("Sprint"))
+        else if (!settings.toggleSprint && Input.GetButton("Sprint"))
         {
             _isSprinting = true; // sprint
             _isCrouching = false; // don't crouch
         }
-        else if (!SettingsMenu.toggleSprint && !Input.GetButton("Sprint"))
+        else if (!settings.toggleSprint && !Input.GetButton("Sprint"))
         {
             _isSprinting = false; // don't sprint
         }
@@ -149,7 +157,7 @@ public class PlayerMovement : MonoBehaviour
     // function to check if player is crouching
     void CrouchCheck()
     {
-        if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && !_isCrouching && (stamina >= (crouchStamina * staminaUsageMod)))
+        if (settings.toggleCrouch && Input.GetButtonDown("Crouch") && !_isCrouching && (stamina >= (crouchStamina * staminaUsageMod)))
         {
             _isCrouching = true; // start crouching
             _isSprinting = false; // stop sprinting
@@ -158,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
             _source.volume = 1f; // sets crouch volume
             _source.Play(); // plays crouch audio
         }
-        else if (SettingsMenu.toggleCrouch && Input.GetButtonDown("Crouch") && _isCrouching && (stamina >= (crouchStamina * staminaUsageMod)))
+        else if (settings.toggleCrouch && Input.GetButtonDown("Crouch") && _isCrouching && (stamina >= (crouchStamina * staminaUsageMod)))
         {
             _isCrouching = false; // stop crouching
             stamina -= crouchStamina * staminaUsageMod; // reduce stamina
@@ -166,12 +174,12 @@ public class PlayerMovement : MonoBehaviour
             _source.volume = 1f; // sets crouch volume
             _source.Play(); // plays crouch audio
         }
-        else if (!SettingsMenu.toggleCrouch && Input.GetButton("Crouch") && (stamina >= (crouchStamina * staminaUsageMod)))
+        else if (!settings.toggleCrouch && Input.GetButton("Crouch") && (stamina >= (crouchStamina * staminaUsageMod)))
         {
             _isCrouching = true; // crouch
             _isSprinting = false; // don't sprint
         }
-        else if (!SettingsMenu.toggleCrouch && !Input.GetButton("Crouch"))
+        else if (!settings.toggleCrouch && !Input.GetButton("Crouch"))
         {
             _isCrouching = false; // don't crouch
         }
@@ -180,27 +188,27 @@ public class PlayerMovement : MonoBehaviour
     // function to check if player is leaning
     void LeanCheck()
     {
-        if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Left") && (_leanState == 0 || _leanState == 2))
+        if (settings.toggleLean && Input.GetButtonDown("Lean Left") && (_leanState == 0 || _leanState == 2))
         {
             _leanState = 1; // lean left
         }
-        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Left") && _leanState == 1)
+        else if (settings.toggleLean && Input.GetButtonDown("Lean Left") && _leanState == 1)
         {
             _leanState = 0; // unlean left
         }
-        else if (!SettingsMenu.toggleLean && Input.GetButton("Lean Left"))
+        else if (!settings.toggleLean && Input.GetButton("Lean Left"))
         {
             _leanState = 1; // lean left
         }
-        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Right") && (_leanState == 0 || _leanState == 1))
+        else if (settings.toggleLean && Input.GetButtonDown("Lean Right") && (_leanState == 0 || _leanState == 1))
         {
             _leanState = 2; // lean right
         }
-        else if (SettingsMenu.toggleLean && Input.GetButtonDown("Lean Right") && _leanState == 2)
+        else if (settings.toggleLean && Input.GetButtonDown("Lean Right") && _leanState == 2)
         {
             _leanState = 0; // unlean right
         }
-        else if (!SettingsMenu.toggleLean && Input.GetButton("Lean Right"))
+        else if (!settings.toggleLean && Input.GetButton("Lean Right"))
         {
             _leanState = 2; // lean right
         }
@@ -307,11 +315,11 @@ public class PlayerMovement : MonoBehaviour
     void FallDamage(float start, float end)
     {
         float distance = (start - end) * 10; // calculate fall distance
-        float fallDamage = (distance * distance) - 10; // calculate applicable fall damage
+        float fallDamage = (distance * distance); // calculate applicable fall damage
         
         if (fallDamage > 0) // apply fall damage if necessary
         {
-            HealthSystem.hp -= fallDamage; // decrease hp
+            hpSys.Damage(fallDamage); // decrease hp
         }
     }
 }
