@@ -17,7 +17,7 @@ public class MouseLook : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked; // lock cursor in center of screen
-        settings = gameObject.GetComponent<SettingsMenu>(); // get settings access
+        settings = gameObject.GetComponentInParent<SettingsMenu>(); // get settings access
     }
 
     // Update is called once per frame
@@ -34,6 +34,10 @@ public class MouseLook : MonoBehaviour
 
             transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f); // apply this vertical mouse movement as a rotation to player head
             playerBody.Rotate(Vector3.up * mouseX); // rotate entire body with lateral mouse movement
+        }
+        else 
+        {
+            Debug.Log("Someone is in a cone of shame");
         } 
     }
 }

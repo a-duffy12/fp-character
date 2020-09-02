@@ -70,27 +70,34 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        GroundCheck(); // ensure player is on the ground  
+        if ((settings != null) && (hpSys != null))
+        {
+            GroundCheck(); // ensure player is on the ground  
 
-        SprintCheck(); // check if player is sprinting
+            SprintCheck(); // check if player is sprinting
 
-        CrouchCheck(); // check if player is crouching
+            CrouchCheck(); // check if player is crouching
 
-        LeanCheck(); // check if player is leaning   
+            LeanCheck(); // check if player is leaning   
 
-        Move(); // move player forward/backward/left/right
+            Move(); // move player forward/backward/left/right
 
-        Jump(); // move player up
+            Jump(); // move player up
 
-        Lean(); // lean player body left or right
+            Lean(); // lean player body left or right
 
-        ApplyGravity(); // move player down
-        
-        StaminaCheck(); // regain or reset player's stamina
+            ApplyGravity(); // move player down
+            
+            StaminaCheck(); // regain or reset player's stamina
 
-        // update stat texts
-        staminaText.text = "Stm: " + stamina.ToString("#.#") + "%";
-        speedText.text = "Spd: " +  _speed.ToString("#.#") + "m/s";
+            // update stat texts
+            staminaText.text = "Stm: " + stamina.ToString("#.#") + "%";
+            speedText.text = "Spd: " +  _speed.ToString("#.#") + "m/s";
+        }
+        else
+        {
+            Debug.Log("Houston, we have a really big fucking problem coming right up");
+        }
     }
 
     // function to keep player on the ground
@@ -315,7 +322,7 @@ public class PlayerMovement : MonoBehaviour
     void FallDamage(float start, float end)
     {
         float distance = (start - end) * 10; // calculate fall distance
-        float fallDamage = (distance * distance); // calculate applicable fall damage
+        float fallDamage = (distance * distance) - 10; // calculate applicable fall damage
         
         if (fallDamage > 0) // apply fall damage if necessary
         {
